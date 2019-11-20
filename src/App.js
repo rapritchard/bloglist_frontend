@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import Blog from './components/Blog';
-import loginService from './services/login';
 import blogService from './services/blogs';
+import LoginForm from './components/LoginForm';
+import BlogForm from './components/BlogForm';
+import Blog from './components/Blog';
+import Notification from './components/Notification';
+
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
+  const [notificationMessage, setNotificationMessage] = useState({
+    messageText: null,
+    error: false,
+  });
 
   useEffect(() => {
     blogService.getAll().then((initialBlogs) => {
@@ -24,54 +31,26 @@ const App = () => {
     }
   }, []);
 
-  const handleLogin = async (event) => {
-    event.preventDefault();
-    try {
-      const user = await loginService.login({
-        username, password,
-      });
-
-      window.localStorage.setItem(
-        'loggedBloglistUser', JSON.stringify(user),
-      );
-
-      blogService.setToken(user.token);
-      setUser(user);
-      setUsername('');
-      setPassword('');
-    } catch (exception) {
-      console.log('Failed to Login');
-    }
+  const handleLogout = () => {
+    window.localStorage.removeItem('loggedBloglistUser');
+    setUser(null);
   };
 
-  const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <h2> Login </h2>
-      <div>
-        <input
-          type="text"
-          value={username}
-          name="username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
-      </div>
-      <div>
-        <input
-          type="password"
-          value={password}
-          name="password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type="submit">Login</button>
-    </form>
-  );
+  const displayBlogs = () => blogs.map((blog) => <Blog key={blog.id} blog={blog} />);
 
   if (user === null) {
     return (
       <div>
-        <h2>Log in to the blog list</h2>
-        {loginForm()}
+        <h2>Login to the blog list</h2>
+        <Notification message={notificationMessage} />
+        <LoginForm
+          username={username}
+          setUsername={setUsername}
+          password={password}
+          setPassword={setPassword}
+          setUser={setUser}
+          setNotificationMessage={setNotificationMessage}
+        />
       </div>
     );
   }
@@ -79,11 +58,17 @@ const App = () => {
   return (
     <div>
       <h1>Blogs</h1>
-      <p>
-        {user.name} logged in
-      </p>
+      <form>
+        {user.name}
+        {' '}
+        logged in
+        {' '}
+        <button type="submit" onClick={handleLogout}>Logout</button>
+      </form>
+      <Notification message={notificationMessage} />
+      <BlogForm blogs={blogs} setBlogs={setBlogs} setNotificationMessage={setNotificationMessage} />
       <div>
-        {blogs.map((blog) => <Blog key={blog.id} blog={blog} />)}
+        {displayBlogs()}
       </div>
     </div>
   );
