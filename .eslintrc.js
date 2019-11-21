@@ -5,6 +5,7 @@ module.exports = {
   },
   extends: [
     'airbnb',
+    'plugin:react/recommended'
   ],
   globals: {
     Atomics: 'readonly',
@@ -18,9 +19,14 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: [
-    'react',
+    'react', 'jest'
   ],
   rules: {
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }]
+    "react/jsx-filename-extension": [1, 
+      { 
+        "extensions": [".js", ".jsx"] 
+    }
+  ],
+    "react/prop-types": 0
   },
 };
