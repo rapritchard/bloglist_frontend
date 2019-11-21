@@ -9,7 +9,6 @@ import Togglable from './components/Togglable';
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
-  const [newBlog, setNewBlog] = useState({ title: '', author: '', url: '' });
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
@@ -19,16 +18,18 @@ const App = () => {
   });
 
   useEffect(() => {
+    (async function grabBlogs() {
+      const initialBlogs = await blogService.getAll();
+      setBlogs(initialBlogs);
+    }());
+  }, []);
+
+  useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBloglistUser');
     if (loggedUserJSON) {
       const savedUser = JSON.parse(loggedUserJSON);
       setUser(savedUser);
       blogService.setToken(savedUser.token);
-
-      (async function grabBlogs() {
-        const initialBlogs = await blogService.getAll();
-        setBlogs(initialBlogs);
-      }());
     }
   }, []);
 
@@ -65,21 +66,21 @@ const App = () => {
     window.localStorage.removeItem('loggedBloglistUser');
   };
 
-  const displayBlogs = () => blogs.map((blog) => <Blog key={blog.id} blog={blog} />);
 
-  const handleAddBlog = async (event) => {
-    event.preventDefault();
+  const handleAddBlog = async (newObject) => {
     try {
-      const returnedBlog = await blogService.create(newBlog);
+      const returnedBlog = await blogService.create(newObject);
+      const returnedBlogWithUser = {
+        ...returnedBlog,
+        user: {
+          id: returnedBlog.user,
+          name: user.name,
+          username: user.username,
+        },
+      };
+      setBlogs(blogs.concat(returnedBlogWithUser));
 
-      setBlogs(blogs.concat(returnedBlog));
-      setNewBlog({
-        title: '',
-        author: '',
-        url: '',
-      });
-
-      setMessage({ text: `Added ${returnedBlog.title} to the list.`, type: 'success' });
+      setMessage({ text: `Added a new blog titled: '${returnedBlog.title}' to the list.`, type: 'success' });
       setTimeout(() => {
         setMessage({ text: null, type: null });
       }, 3000);
@@ -89,6 +90,52 @@ const App = () => {
         setMessage({ text: null, type: null });
       }, 3000);
     }
+  };
+
+  const handleLikeBlog = async (oldBlog) => {
+    const { id } = oldBlog;
+    const updatedBlog = { ...oldBlog, likes: oldBlog.likes + 1 };
+
+    try {
+      const returnedBlog = await blogService.update(id, updatedBlog);
+      setBlogs(
+        blogs.map(
+          (b) => {
+            if (b.id === id) {
+              b.likes += 1;
+              return b;
+            }
+            return b;
+          },
+        ),
+      );
+    } catch (exception) {
+      setMessage({ text: 'Failed to like this blog.', type: 'error' });
+      setTimeout(() => {
+        setMessage({ text: null, type: null });
+      }, 3000);
+    }
+  };
+
+  const handleDeleteBlog = async (id) => {
+    const blogToDelete = blogs.find(b => b.id === id);
+    if (window.confirm(`Remove blog '${blogToDelete.title}' by ${blogToDelete.author}`)) {
+      try {
+        await blogService.deleteRecord(id);
+        setBlogs(blogs.filter((b) => b.id !== id));
+      } catch (exception) {
+        setMessage({ text: 'This blog has already been removed.', type: 'error' });
+        setTimeout(() => {
+          setMessage({ text: null, type: null });
+        }, 3000);
+        setBlogs(blogs.filter((b) => b.id !== id));
+      }
+    }
+  }
+
+  const displayBlogs = () => {
+    blogs.sort((a, b) => b.likes - a.likes);
+    return blogs.map((blog) => <Blog key={blog.id} blog={blog} user={user} handleLikeBlog={handleLikeBlog} handleDeleteBlog={handleDeleteBlog} />);
   };
 
   if (user === null) {
@@ -120,9 +167,7 @@ const App = () => {
       <Notification message={message} />
       <Togglable buttonLabel="Add Blog">
         <BlogForm
-          handleSubmit={handleAddBlog}
-          newBlog={newBlog}
-          setNewBlog={setNewBlog}
+          handleAddBlog={handleAddBlog}
         />
       </Togglable>
       <div>
