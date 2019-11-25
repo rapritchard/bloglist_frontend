@@ -2,6 +2,7 @@ module.exports = {
   env: {
     browser: true,
     es6: true,
+    jest: true,
   },
   extends: [
     'airbnb',
@@ -19,7 +20,7 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: [
-    'react', 'jest'
+    'react'
   ],
   rules: {
     "react/jsx-filename-extension": [1, 
@@ -27,6 +28,6 @@ module.exports = {
         "extensions": [".js", ".jsx"] 
     }
   ],
-    "react/prop-types": 0
+    "react/prop-types": 0,
   },
 };

@@ -12,7 +12,7 @@ const BlogForm = ({ handleAddBlog }) => {
         title: newTitle,
         author: newAuthor,
         url: newUrl,
-      }
+      };
       await handleAddBlog(newBlog);
       setNewTitle('');
       setNewAuthor('');
@@ -20,7 +20,7 @@ const BlogForm = ({ handleAddBlog }) => {
     } catch (exception) {
       // Ignore
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -30,7 +30,7 @@ const BlogForm = ({ handleAddBlog }) => {
           type="text"
           value={newTitle}
           name="title"
-          onChange={({ target }) => setNewTitle(target.value )}
+          onChange={({ target }) => setNewTitle(target.value)}
         />
       </div>
       <div>
