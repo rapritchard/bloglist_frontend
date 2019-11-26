@@ -19,13 +19,13 @@ const Blog = ({ blog, user, handleLikeBlog, handleDeleteBlog}) => {
 
 
   return (
-    <div style={blogStyle}>
-      <div onClick={toggleVisibility}>
+    <div className="blog" style={blogStyle}>
+      <div className="blogTitle" onClick={toggleVisibility}>
         {blog.title}
         {' '}
         {blog.author}
       </div>
-      <div style={showWhenVisible}>
+      <div className="blogInfo" style={showWhenVisible}>
         <a href={blog.url} target="_blank" rel="noopener noreferrer">{blog.url}</a>
         <p>
           {blog.likes}

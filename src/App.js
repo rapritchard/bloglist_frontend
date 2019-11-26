@@ -67,9 +67,12 @@ const App = () => {
   };
 
 
+  const blogFormRef = React.createRef();
+
   const handleAddBlog = async (newObject) => {
     try {
       const returnedBlog = await blogService.create(newObject);
+      blogFormRef.current.toggleVisibility();
       const returnedBlogWithUser = {
         ...returnedBlog,
         user: {
@@ -165,7 +168,7 @@ const App = () => {
         <button type="submit" onClick={handleLogout}>Logout</button>
       </form>
       <Notification message={message} />
-      <Togglable buttonLabel="Add Blog">
+      <Togglable buttonLabel="Add Blog" ref={blogFormRef}>
         <BlogForm
           handleAddBlog={handleAddBlog}
         />
