@@ -135,10 +135,10 @@ const App = () => {
       }
     }
   }
-
+  
   const displayBlogs = () => {
     blogs.sort((a, b) => b.likes - a.likes);
-    return blogs.map((blog) => <Blog key={blog.id} blog={blog} user={user} handleLikeBlog={handleLikeBlog} handleDeleteBlog={handleDeleteBlog} />);
+    return blogs.map((blog) => <Blog key={blog.id} blog={blog} username={user.username} handleLikeBlog={handleLikeBlog} handleDeleteBlog={handleDeleteBlog} />);
   };
 
   if (user === null) {
