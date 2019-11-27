@@ -32,7 +32,7 @@ describe('<Blog /> Component', () => {
     mockHandler = jest.fn();
 
     component = render(
-      <Blog blog={blog} user={user} handleLikeBlog={mockHandler} handleDeleteBlog={mockHandler} />,
+      <Blog blog={blog} username={user.username} handleLikeBlog={mockHandler} handleDeleteBlog={mockHandler} />,
     );
   });
 
