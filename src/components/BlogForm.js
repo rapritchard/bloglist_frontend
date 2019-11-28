@@ -1,22 +1,23 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useField } from '../hooks';
 
 const BlogForm = ({ handleAddBlog }) => {
-  const [newTitle, setNewTitle] = useState('');
-  const [newAuthor, setNewAuthor] = useState('');
-  const [newUrl, setNewUrl] = useState('');
+  const title = useField('text');
+  const author = useField('text');
+  const url = useField('text');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
       const newBlog = {
-        title: newTitle,
-        author: newAuthor,
-        url: newUrl,
+        title: title.attributes.value,
+        author: author.attributes.value,
+        url: url.attributes.value,
       };
       await handleAddBlog(newBlog);
-      setNewTitle('');
-      setNewAuthor('');
-      setNewUrl('');
+      title.reset();
+      author.reset();
+      url.reset();
     } catch (exception) {
       // Ignore
     }
@@ -26,30 +27,15 @@ const BlogForm = ({ handleAddBlog }) => {
     <form onSubmit={handleSubmit}>
       <div>
         Title:
-        <input
-          type="text"
-          value={newTitle}
-          name="title"
-          onChange={({ target }) => setNewTitle(target.value)}
-        />
+        <input {...title.attributes}/>
       </div>
       <div>
         Author:
-        <input
-          type="text"
-          value={newAuthor}
-          name="author"
-          onChange={({ target }) => setNewAuthor(target.value)}
-        />
+        <input {...author.attributes}/>
       </div>
       <div>
         URL:
-        <input
-          type="text"
-          value={newUrl}
-          name="url"
-          onChange={({ target }) => setNewUrl(target.value)}
-        />
+        <input {...url.attributes}/>
       </div>
       <button type="submit">Create</button>
     </form>

@@ -6,16 +6,18 @@ import BlogForm from './components/BlogForm';
 import Blog from './components/Blog';
 import Notification from './components/Notification';
 import Togglable from './components/Togglable';
+import { useField } from './hooks';
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const username = useField('text');
+  const password = useField('password');
   const [user, setUser] = useState(null);
   const [message, setMessage] = useState({
     text: null,
     type: null,
   });
+
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBloglistUser');
@@ -35,7 +37,7 @@ const App = () => {
     event.preventDefault();
     try {
       const userToLogin = await loginService.login({
-        username, password,
+        username: username.attributes.value, password: password.attributes.value,
       });
 
       window.localStorage.setItem(
@@ -44,8 +46,8 @@ const App = () => {
 
       blogService.setToken(userToLogin.token);
       setUser(userToLogin);
-      setUsername('');
-      setPassword('');
+      username.reset();
+      password.reset();
 
       const initialBlogs = await blogService.getAll();
       setBlogs(initialBlogs);
@@ -135,8 +137,8 @@ const App = () => {
         setBlogs(blogs.filter((b) => b.id !== id));
       }
     }
-  }
-  
+  };
+
   const displayBlogs = () => {
     blogs.sort((a, b) => b.likes - a.likes);
     return blogs.map((blog) => <Blog key={blog.id} blog={blog} username={user.username} handleLikeBlog={handleLikeBlog} handleDeleteBlog={handleDeleteBlog} />);
@@ -149,9 +151,7 @@ const App = () => {
         <Notification message={message} />
         <LoginForm
           username={username}
-          handleUsernameChange={({ target }) => setUsername(target.value)}
           password={password}
-          handlePasswordChange={({ target }) => setPassword(target.value)}
           handleSubmit={handleLogin}
         />
       </div>

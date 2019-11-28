@@ -20,7 +20,8 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: [
-    'react'
+    'react',
+    'react-hooks'
   ],
   rules: {
     "react/jsx-filename-extension": [1, 
@@ -28,6 +29,7 @@ module.exports = {
         "extensions": [".js", ".jsx"] 
     }
   ],
-    "react/prop-types": 0,
+  "react-hooks/rules-of-hooks": "error",
+  "react/prop-types": 0,
   },
 };
