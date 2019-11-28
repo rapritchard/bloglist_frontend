@@ -18,19 +18,17 @@ const App = () => {
   });
 
   useEffect(() => {
-    (async function grabBlogs() {
-      const initialBlogs = await blogService.getAll();
-      setBlogs(initialBlogs);
-    }());
-  }, []);
-
-  useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBloglistUser');
     if (loggedUserJSON) {
       const savedUser = JSON.parse(loggedUserJSON);
       setUser(savedUser);
-      blogService.setToken(savedUser.token);
+      // Caused errors in testing
+      // blogService.setToken(savedUser.token);
     }
+    (async function grabBlogs() {
+      const initialBlogs = await blogService.getAll();
+      setBlogs(initialBlogs);
+    }());
   }, []);
 
   const handleLogin = async (event) => {
@@ -71,6 +69,7 @@ const App = () => {
 
   const handleAddBlog = async (newObject) => {
     try {
+      blogService.setToken(user.token);
       const returnedBlog = await blogService.create(newObject);
       blogFormRef.current.toggleVisibility();
       const returnedBlogWithUser = {
@@ -100,6 +99,7 @@ const App = () => {
     const updatedBlog = { ...oldBlog, likes: oldBlog.likes + 1 };
 
     try {
+      blogService.setToken(user.token);
       const returnedBlog = await blogService.update(id, updatedBlog);
       setBlogs(
         blogs.map(
@@ -124,6 +124,7 @@ const App = () => {
     const blogToDelete = blogs.find(b => b.id === id);
     if (window.confirm(`Remove blog '${blogToDelete.title}' by ${blogToDelete.author}`)) {
       try {
+        blogService.setToken(user.token);
         await blogService.deleteRecord(id);
         setBlogs(blogs.filter((b) => b.id !== id));
       } catch (exception) {

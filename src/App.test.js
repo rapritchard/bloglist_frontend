@@ -36,8 +36,8 @@ describe('<App />', () => {
       () => component.container.querySelector('.blogTitle'),
     );
 
-    // const blogs = component.container.querySelectorAll('.blogTitle');
-    // expect(blogs.length).toBe(4);
+    const blogs = component.container.querySelectorAll('.blogTitle');
+    expect(blogs.length).toBe(4);
 
     expect(component.container).toHaveTextContent(
       'React patterns',
