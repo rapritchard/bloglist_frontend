@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { setNotification } from './actions/notifcation';
+import { useDispatch } from 'react-redux';
+import setNotification from './actions/notifcationActions';
 import loginService from './services/login';
 import blogService from './services/blogs';
 import LoginForm from './components/LoginForm';
@@ -10,16 +10,13 @@ import Notification from './components/Notification';
 import Togglable from './components/Togglable';
 import { useField } from './hooks';
 
-const App = (props) => {
+const App = () => {
   const [blogs, setBlogs] = useState([]);
   const username = useField('text');
   const password = useField('password');
   const [user, setUser] = useState(null);
-  // const [message, setMessage] = useState({
-  //   text: null,
-  //   type: null,
-  // });
 
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBloglistUser');
@@ -54,11 +51,11 @@ const App = (props) => {
       const initialBlogs = await blogService.getAll();
       setBlogs(initialBlogs);
     } catch (exception) {
-      props.setNotification(
+      dispatch(setNotification(
         'error',
         exception.response.data.error,
         3000,
-      );
+      ));
     }
   };
 
@@ -86,17 +83,17 @@ const App = (props) => {
         },
       };
       setBlogs(blogs.concat(returnedBlogWithUser));
-      props.setNotification(
+      dispatch(setNotification(
         'success',
         `Added a new blog titled: '${returnedBlog.title}' to the list.`,
         3000,
-      );
+      ));
     } catch (exception) {
-      props.setNotification(
+      dispatch(setNotification(
         'error',
         exception.response.data.error,
         3000,
-      );
+      ));
     }
   };
 
@@ -119,11 +116,11 @@ const App = (props) => {
         ),
       );
     } catch (exception) {
-      props.setNotification(
+      dispatch(setNotification(
         'error',
         'Failed to like this blog.',
         3000,
-      );
+      ));
     }
   };
 
@@ -136,11 +133,11 @@ const App = (props) => {
         setBlogs(blogs.filter((b) => b.id !== id));
       } catch (exception) {
         setBlogs(blogs.filter((b) => b.id !== id));
-        props.setNotification(
+        dispatch(setNotification(
           'error',
           'This blog has already been removed.',
           3000,
-        );
+        ));
       }
     }
   };
@@ -187,7 +184,4 @@ const App = (props) => {
   );
 };
 
-export default connect(
-  null,
-  { setNotification },
-)(App);
+export default App;
