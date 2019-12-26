@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import { setNotification } from './actions/notifcation';
 import loginService from './services/login';
 import blogService from './services/blogs';
 import LoginForm from './components/LoginForm';
@@ -8,15 +10,15 @@ import Notification from './components/Notification';
 import Togglable from './components/Togglable';
 import { useField } from './hooks';
 
-const App = () => {
+const App = (props) => {
   const [blogs, setBlogs] = useState([]);
   const username = useField('text');
   const password = useField('password');
   const [user, setUser] = useState(null);
-  const [message, setMessage] = useState({
-    text: null,
-    type: null,
-  });
+  // const [message, setMessage] = useState({
+  //   text: null,
+  //   type: null,
+  // });
 
 
   useEffect(() => {
@@ -52,10 +54,11 @@ const App = () => {
       const initialBlogs = await blogService.getAll();
       setBlogs(initialBlogs);
     } catch (exception) {
-      setMessage({ text: exception.response.data.error, type: 'error' });
-      setTimeout(() => {
-        setMessage({ text: null, type: null });
-      }, 3000);
+      props.setNotification(
+        'error',
+        exception.response.data.error,
+        3000,
+      );
     }
   };
 
@@ -83,16 +86,17 @@ const App = () => {
         },
       };
       setBlogs(blogs.concat(returnedBlogWithUser));
-
-      setMessage({ text: `Added a new blog titled: '${returnedBlog.title}' to the list.`, type: 'success' });
-      setTimeout(() => {
-        setMessage({ text: null, type: null });
-      }, 3000);
+      props.setNotification(
+        'success',
+        `Added a new blog titled: '${returnedBlog.title}' to the list.`,
+        3000,
+      );
     } catch (exception) {
-      setMessage({ text: exception.response.data.error, type: 'error' });
-      setTimeout(() => {
-        setMessage({ text: null, type: null });
-      }, 3000);
+      props.setNotification(
+        'error',
+        exception.response.data.error,
+        3000,
+      );
     }
   };
 
@@ -115,10 +119,11 @@ const App = () => {
         ),
       );
     } catch (exception) {
-      setMessage({ text: 'Failed to like this blog.', type: 'error' });
-      setTimeout(() => {
-        setMessage({ text: null, type: null });
-      }, 3000);
+      props.setNotification(
+        'error',
+        'Failed to like this blog.',
+        3000,
+      );
     }
   };
 
@@ -130,11 +135,12 @@ const App = () => {
         await blogService.deleteRecord(id);
         setBlogs(blogs.filter((b) => b.id !== id));
       } catch (exception) {
-        setMessage({ text: 'This blog has already been removed.', type: 'error' });
-        setTimeout(() => {
-          setMessage({ text: null, type: null });
-        }, 3000);
         setBlogs(blogs.filter((b) => b.id !== id));
+        props.setNotification(
+          'error',
+          'This blog has already been removed.',
+          3000,
+        );
       }
     }
   };
@@ -148,7 +154,7 @@ const App = () => {
     return (
       <div>
         <h2>Login to the blog list</h2>
-        <Notification message={message} />
+        <Notification />
         <LoginForm
           username={username}
           password={password}
@@ -168,7 +174,7 @@ const App = () => {
         {' '}
         <button type="submit" onClick={handleLogout}>Logout</button>
       </form>
-      <Notification message={message} />
+      <Notification />
       <Togglable buttonLabel="Add Blog" ref={blogFormRef}>
         <BlogForm
           handleAddBlog={handleAddBlog}
@@ -181,4 +187,7 @@ const App = () => {
   );
 };
 
-export default App;
+export default connect(
+  null,
+  { setNotification },
+)(App);
