@@ -16,4 +16,5 @@ const Notification = () => {
   );
 };
 
-export default Notification;
+const MemoNotification = React.memo(Notification);
+export default MemoNotification;

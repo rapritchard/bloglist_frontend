@@ -1,5 +1,11 @@
+const clearNotification = () => {
+  return async (dispatch) => {
+    dispatch({ type: 'CLEAR_NOTIFICATION' });
+  };
+};
+
 const setNotification = (type, message, seconds) => {
-  return (dispatch) => {
+  return async (dispatch) => {
     dispatch({
       type: 'SET_NOTIFICATION',
       data: {
@@ -9,9 +15,12 @@ const setNotification = (type, message, seconds) => {
     });
 
     setTimeout(() => {
-      dispatch({ type: 'CLEAR_NOTIFICATION' });
+      dispatch(clearNotification());
     }, seconds);
   };
 };
 
-export default setNotification;
+export {
+  setNotification,
+  clearNotification,
+};
