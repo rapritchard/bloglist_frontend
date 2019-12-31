@@ -13,7 +13,6 @@ const LoginForm = ({ setUser, initializeBlogs, setNotification }) => {
 
   // const dispatch = useDispatch();
 
-
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
