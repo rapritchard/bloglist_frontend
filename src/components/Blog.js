@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { connect, useSelector, useDispatch } from 'react-redux';
 import { setNotification } from '../actions/notifcationActions';
 import {
   likeBlog, removeBlog,
 } from '../actions/blogsActions';
 
-// { blog, username, handleLikeBlog, handleDeleteBlog
-const Blog = ({ blogId }) => {
+const HookBlog = ({ blogId }) => {
   const blog = useSelector((state) => state.blogs.find((b) => b.id === blogId));
   const user = useSelector((state) => state.user);
   const [visible, setVisible] = useState(false);
@@ -79,4 +78,72 @@ const Blog = ({ blogId }) => {
   );
 };
 
-export default Blog;
+const Blog = ({ blog, user, likeBlog, removeBlog, setNotification }) => {
+  const [visible, setVisible] = useState(false);
+
+  const toggleVisibility = () => {
+    setVisible(!visible);
+  };
+
+  const showWhenVisible = { display: visible ? '' : 'none' };
+
+  const blogStyle = {
+    paddingTop: 10,
+    paddingLeft: 2,
+    border: 'solid',
+    borderWidth: 1,
+    marginBottom: 5,
+  };
+
+  const handleLikeBlog = async (oldBlog) => {
+    const { id } = oldBlog;
+    const updatedBlog = { ...oldBlog, likes: oldBlog.likes + 1 };
+    try {
+      likeBlog(id, updatedBlog);
+    } catch (exception) {
+      setNotification('error', 'Failed to like this blog.', 3000);
+    }
+  };
+
+  const handleDeleteBlog = async (blogToDelete) => {
+    if (window.confirm(`Remove blog '${blogToDelete.title}' by ${blogToDelete.author}`)) {
+      try {
+        removeBlog(blogToDelete.id);
+      } catch (exception) {
+        setNotification('error', 'This blog has already been removed.', 3000);
+      }
+    }
+  };
+
+
+  return (
+    <div className="blog" style={blogStyle}>
+      <div className="blogTitle" onClick={toggleVisibility}>
+        {blog.title}
+        {' '}
+        {blog.author}
+      </div>
+      <div className="blogInfo" style={showWhenVisible}>
+        <a href={blog.url} target="_blank" rel="noopener noreferrer">{blog.url}</a>
+        <p>
+          {blog.likes}
+          {' '}
+          likes
+          {' '}
+          <button type="button" onClick={() => handleLikeBlog(blog)}>Like</button>
+        </p>
+        <p>Added by {blog.user.name}</p>
+        {user.username === blog.user.username && <button type="button" onClick={() => handleDeleteBlog(blog)}>Remove</button>}
+      </div>
+    </div>
+  );
+};
+
+const mapStateToProps = (state, ownProps) => ({
+  blog: state.blogs.find((b) => b.id === ownProps.blogId),
+  user: state.user,
+});
+
+const ConnectedBlog = connect(mapStateToProps, { likeBlog, removeBlog, setNotification })(Blog);
+
+export default ConnectedBlog;
