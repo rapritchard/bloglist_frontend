@@ -1,7 +1,10 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { useField } from '../hooks';
+import { addBlog } from '../actions/blogsActions';
+import { setNotification } from '../actions/notifcationActions';
 
-const BlogForm = ({ handleAddBlog }) => {
+const BlogForm = ({ addBlog, setNotification }) => {
   const title = useField('text');
   const author = useField('text');
   const url = useField('text');
@@ -14,12 +17,21 @@ const BlogForm = ({ handleAddBlog }) => {
         author: author.attributes.value,
         url: url.attributes.value,
       };
-      await handleAddBlog(newBlog);
+      await addBlog(newBlog);
       title.reset();
       author.reset();
       url.reset();
+      setNotification(
+        'success',
+        `Added a new blog titled: '${newBlog.title}' to the list.`,
+        3000,
+      );
     } catch (exception) {
-      // Ignore
+      setNotification(
+        'error',
+        exception.response.data.error,
+        3000,
+      );
     }
   };
 
@@ -42,4 +54,12 @@ const BlogForm = ({ handleAddBlog }) => {
   );
 };
 
-export default BlogForm;
+const connectBlogForm = connect(
+  null,
+  {
+    addBlog,
+    setNotification,
+  }
+)(BlogForm);
+
+export default connectBlogForm;

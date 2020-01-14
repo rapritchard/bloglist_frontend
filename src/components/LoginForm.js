@@ -7,7 +7,7 @@ import loginService from '../services/login';
 import blogService from '../services/blogs';
 import { useField } from '../hooks';
 
-const LoginForm = ({ setUser, initializeBlogs, setNotification }) => {
+const LoginForm = (props) => {
   const username = useField('text');
   const password = useField('password');
 
@@ -25,19 +25,13 @@ const LoginForm = ({ setUser, initializeBlogs, setNotification }) => {
       );
 
       blogService.setToken(userToLogin.token);
-      setUser(userToLogin);
-      initializeBlogs();
-      // dispatch(setUser(userToLogin));
-      // dispatch(initializeBlogs());
+      props.setUser(userToLogin);
+      props.initializeBlogs();
+
       username.reset();
       password.reset();
     } catch (exception) {
-      setNotification('error', exception.response.data.error, 3000);
-      // dispatch(setNotification(
-      //   'error',
-      //   exception.response.data.error,
-      //   3000,
-      // ));
+      props.setNotification('error', exception.response.data.error, 3000);
     }
   };
   return (

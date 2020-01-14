@@ -1,67 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { setNotification } from './actions/notifcationActions';
-import {
-  initializeBlogs, addBlog, clearBlogs,
-} from './actions/blogsActions';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { connect } from 'react-redux';
+import Container from '@material-ui/core/Container';
+
+import { initializeBlogs, clearBlogs } from './actions/blogsActions';
+import { initializeUsers, clearUsers } from './actions/usersActions';
 import { setUser, clearUser } from './actions/userActions';
 import LoginForm from './components/LoginForm';
+import NavBar from './components/NavBar';
 import BlogForm from './components/BlogForm';
 import BlogList from './components/BlogList';
+import Blog from './components/Blog';
+import Users from './components/Users';
+import User from './components/User';
 import Notification from './components/Notification';
 import Togglable from './components/Togglable';
 
-const App = () => {
-  const user = useSelector((state) => state.user);
-
-  const dispatch = useDispatch();
+const App = (props) => {
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBloglistUser');
-    if (loggedUserJSON) {
+    if (props.user === null && loggedUserJSON) {
       const savedUser = JSON.parse(loggedUserJSON);
-      dispatch(setUser(savedUser));
+      props.setUser(savedUser);
       // Caused errors in testing
       // blogService.setToken(savedUser.token);
     }
-    const fetchBlogs = async () => {
-      try {
-        dispatch(initializeBlogs());
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    fetchBlogs();
-  }, [dispatch]);
+
+    props.initializeBlogs();
+    props.initializeUsers();
+  }, [props]);
 
   const handleLogout = (event) => {
     event.preventDefault();
-    dispatch(clearUser());
-    dispatch(clearBlogs());
+    props.clearUser();
+    props.clearBlogs();
+    props.clearUsers();
     window.localStorage.removeItem('loggedBloglistUser');
   };
 
-  const blogFormRef = React.createRef();
-
-  const handleAddBlog = async (newObject) => {
-    blogFormRef.current.toggleVisibility();
-    try {
-      await dispatch(addBlog(newObject));
-      dispatch(setNotification(
-        'success',
-        `Added a new blog titled: '${newObject.title}' to the list.`,
-        3000,
-      ));
-    } catch (exception) {
-      dispatch(setNotification(
-        'error',
-        exception.response.data.error,
-        3000,
-      ));
-    }
-  };
-
-  if (user === null) {
+  if (props.user === null) {
     return (
       <div>
         <h2>Login to the blog list</h2>
@@ -73,23 +51,35 @@ const App = () => {
 
   return (
     <div>
-      <h1>Blogs</h1>
-      <form>
-        {user.name}
-        {' '}
-        logged in
-        {' '}
-        <button type="submit" onClick={handleLogout}>Logout</button>
-      </form>
-      <Notification />
-      <Togglable buttonLabel="Add Blog" ref={blogFormRef}>
-        <BlogForm
-          handleAddBlog={handleAddBlog}
-        />
-      </Togglable>
-      <BlogList />
+      <Router>
+        <NavBar username={props.user.name} handleLogout={handleLogout} />
+        <h1>Blogs</h1>
+        <Notification />
+        <Togglable buttonLabel="Add Blog">
+          <BlogForm />
+        </Togglable>
+        <Route exact path="/" render={() => <BlogList />} />
+        <Route exact path="/blogs/:id" render={({ match }) => <Blog id={match.params.id} />} />
+        <Route exact path="/users" render={() => <Users />} />
+        <Route exact path="/users/:id" render={({ match }) => <User id={match.params.id} />} />
+
+      </Router>
     </div>
   );
 };
 
-export default App;
+const mapStateToProps = (state) => ({
+  user: state.user,
+});
+
+export default connect(
+  mapStateToProps,
+  {
+    initializeBlogs,
+    clearBlogs,
+    setUser,
+    clearUser,
+    initializeUsers,
+    clearUsers,
+  },
+)(App);
